@@ -4,12 +4,13 @@ import requests
 
 URL = "https://ru.wikipedia.org/wiki/%D0%A1%D0%BF%D0%B8%D1%81%D0%BE%D0%BA_%D0%B3%D0%BE%D1%81%D1%83%D0%B4%D0%B0%D1%80" \
       "%D1%81%D1%82%D0%B2 "
-res = requests.get(URL)
+try:
+    res = requests.get(URL)
+except Exception: res=None
 print(res)
 if res:
     print('Response OK')
     soup = BeautifulSoup(res.text, "lxml")
-
     country_list = []
     Countries = soup.find('tbody').find_all('tr')
     for _country in Countries:
@@ -26,22 +27,24 @@ if res:
             if item['country'][0] == item_count['country'][0]:
                 letter_count += 1
         item['same_letter_count'] = letter_count
-    print(country_list)
+    for item in country_list:
+        print(item)
 
     with open(f"country.json", 'w', encoding='utf-8') as file:
         json.dump(country_list, file, indent=4, ensure_ascii=False)
 
-
-
     def search(contr):
         for search_item in country_list:
             if search_item['country'] == contr:
-                print(search_item)
-                return
+                print(str(search_item).replace(",","\n").replace("'","")[1:-1])
+                return True
+            elif contr == '0':
+                return False
         print('Nothing found')
+        return True
 
-
-    search(input('Enter country name: '))
+    while True:
+        if not search(input('Enter country name: ')): break
 
 else:
     print('Response Failed')
